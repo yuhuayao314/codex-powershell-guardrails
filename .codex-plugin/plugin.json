@@ -1,0 +1,22 @@
+{
+  "name": "codex-powershell-guardrails",
+  "version": "0.1.0",
+  "description": "PowerShell and Windows guardrails for Codex agents: safer commands, encoding hygiene, remote Windows SSH patterns, and release artifact checks.",
+  "author": {
+    "name": "yuhuayao314"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "PowerShell Guardrails",
+    "shortDescription": "Avoid common Codex mistakes on Windows and PowerShell.",
+    "longDescription": "Practical guardrails for Codex agents working in Windows/PowerShell environments, including here-string patterns, UTF-8/BOM hygiene, safe file operations, SSH quoting, scheduled-task exit codes, and release artifact checks.",
+    "developerName": "yuhuayao314",
+    "category": "Productivity",
+    "capabilities": [
+      "PowerShell command safety",
+      "Windows encoding checks",
+      "Release artifact hygiene"
+    ],
+    "defaultPrompt": "Use PowerShell Guardrails to review or write Windows-safe Codex commands."
+  }
+}
