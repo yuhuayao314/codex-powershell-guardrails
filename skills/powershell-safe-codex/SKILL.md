@@ -1,11 +1,11 @@
 ---
 name: powershell-safe-codex
-description: Use when Codex is working on Windows or PowerShell commands, Windows SSH/Paramiko automation, scheduled tasks, WeChat Mini Program files, release packaging, or any task where Unix shell habits may break on Windows. Helps avoid heredoc mistakes, quoting bugs, UTF-8 BOM issues, unsafe deletes, localhost leaks, pycache/log/env/database artifacts, and unclear task-scheduler exit codes.
+description: Always use when Codex will write, review, explain, or run any PowerShell command or script. Also use for Windows terminal work, Windows paths, .ps1/.bat/.cmd files, cmd.exe commands, Windows SSH/Paramiko automation, scheduled tasks, WeChat Mini Program files, release packaging, or any task where Unix shell habits may break on Windows. Helps avoid heredoc mistakes, quoting bugs, UTF-8 BOM issues, unsafe deletes, localhost leaks, pycache/log/env/database artifacts, and unclear task-scheduler exit codes.
 ---
 
 # PowerShell Safe Codex
 
-Use this skill before writing or running commands in a Windows/PowerShell environment, especially when porting Linux shell patterns, editing frontend files, packaging releases, or automating a Windows server.
+Use this skill before writing, reviewing, explaining, or running any PowerShell command. Also use it for Windows terminal work, Windows paths, release packaging, frontend encoding checks, or Windows server automation.
 
 ## Default Workflow
 
