@@ -1,0 +1,20 @@
+{
+  "name": "yuhuayao314",
+  "interface": {
+    "displayName": "yuhuayao314 Plugins"
+  },
+  "plugins": [
+    {
+      "name": "codex-powershell-guardrails",
+      "source": {
+        "source": "local",
+        "path": "./plugins/codex-powershell-guardrails"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
