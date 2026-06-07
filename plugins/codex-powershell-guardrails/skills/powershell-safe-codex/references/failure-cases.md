@@ -125,3 +125,11 @@ Symptom: a cache or release folder validates but still contains old file content
 Cause: `-LiteralPath` treats `*` as a literal character. A command like `Copy-Item -LiteralPath 'source\*' ...` does not mean "copy all children".
 
 Fix: use `Copy-Item -Path 'source\*' -Destination target -Recurse -Force` when wildcard expansion is intended, or use `robocopy source target /E` for directory synchronization without deleting extra files.
+
+## Start-Process loses quotes around Program Files path
+
+Symptom: a newly opened PowerShell window reports `The term 'C:\Program' is not recognized`.
+
+Cause: `Start-Process powershell.exe -ArgumentList` launched another parser pass, and the quoted executable path inside the command string lost its quotes. Paths under `C:\Program Files\...` were split at the space.
+
+Fix: use `-EncodedCommand`, a temporary `.ps1` file, or carefully separated arguments. For visible interactive login flows, `-EncodedCommand` is often the least fragile option.

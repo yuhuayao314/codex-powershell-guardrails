@@ -62,6 +62,14 @@ robocopy 'C:\source' 'C:\target' /E /NFL /NDL /NJH /NJS /NP
 if ($LASTEXITCODE -le 7) { exit 0 } else { exit $LASTEXITCODE }
 ```
 
+When opening a visible PowerShell window with a command path that contains spaces, encode the command instead of relying on nested quotes:
+
+```powershell
+$cmd = "& 'C:\Program Files\GitHub CLI\gh.exe' auth status"
+$encoded = [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($cmd))
+Start-Process powershell.exe -ArgumentList @('-NoExit', '-EncodedCommand', $encoded)
+```
+
 ## Search
 
 Prefer `rg` when it works, but Windows installs sometimes fail with `Access is denied`.

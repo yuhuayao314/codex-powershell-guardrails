@@ -236,6 +236,19 @@ BUILTIN_MEMORIES = [
         "files_often_involved": "PowerShell commands, plugin cache sync, release sync",
         "commands_often_used": "Copy-Item -Path 'C:\\source\\*' -Destination 'C:\\target' -Recurse -Force",
     },
+    {
+        "title": "Start-Process 二次解析丢失 Program Files 路径引号",
+        "category": "shell",
+        "severity": "medium",
+        "signature": "The term 'C:\\Program' is not recognized Start-Process ArgumentList Program Files quotes",
+        "keywords": "powershell start-process argumentlist program files quotes encodedcommand gh auth login",
+        "root_cause": "`Start-Process powershell.exe -ArgumentList` 会启动新的 PowerShell 解析命令，带空格的路径如果在二次解析中丢失引号，就会被拆成 `C:\\Program`。",
+        "fix_steps": "改用 `-EncodedCommand`、临时 `.ps1` 脚本，或严格分离 `-ArgumentList` 参数；需要可见交互窗口时优先使用 `-EncodedCommand`。",
+        "prevention_rule": "打开新 PowerShell 执行 `C:\\Program Files\\...` 下的程序时，不要依赖嵌套引号字符串。",
+        "verification_steps": "新窗口中命令能识别完整 exe 路径，不再出现 `C:\\Program` not recognized。",
+        "files_often_involved": "PowerShell commands, GitHub CLI login, visible terminal launch",
+        "commands_often_used": "$encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($cmd)); Start-Process powershell.exe -ArgumentList @('-NoExit','-EncodedCommand',$encoded)",
+    },
 ]
 
 
