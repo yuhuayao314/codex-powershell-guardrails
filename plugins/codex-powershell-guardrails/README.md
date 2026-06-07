@@ -40,10 +40,7 @@ python scripts\check_windows_artifacts.py C:\path\to\project --allow-localhost
 
 ## Installing Locally
 
-This repository supports two install styles:
-
-- Plugin root install: use the repository as a single plugin.
-- Marketplace install: use the repository as a tiny marketplace that contains this plugin under `plugins/codex-powershell-guardrails`.
+This repository is a single plugin root.
 
 Install from a local checkout with Codex:
 
@@ -51,13 +48,17 @@ Install from a local checkout with Codex:
 codex plugin install E:\path\to\codex-powershell-guardrails
 ```
 
-After publishing to GitHub, users can install from the repository URL:
+Users can install from the public repository URL:
 
 ```powershell
-codex plugin install https://github.com/<owner>/codex-powershell-guardrails
+codex plugin install https://github.com/yuhuayao314/codex-powershell-guardrails
 ```
 
-If your Codex UI asks you to add a marketplace instead of a single plugin, add the same GitHub repository as a marketplace, then install `codex-powershell-guardrails` from the `yuhuayao314` marketplace.
+Or install it from the public marketplace repository:
+
+```powershell
+codex plugin marketplace add https://github.com/yuhuayao314/codex-plugin-marketplace
+```
 
 ## Suggested Use
 

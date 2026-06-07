@@ -5,6 +5,15 @@
   "author": {
     "name": "yuhuayao314"
   },
+  "repository": "https://github.com/yuhuayao314/codex-powershell-guardrails",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "powershell",
+    "windows",
+    "guardrails",
+    "release-hygiene"
+  ],
   "skills": "./skills/",
   "interface": {
     "displayName": "PowerShell Guardrails",

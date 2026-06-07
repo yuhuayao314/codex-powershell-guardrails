@@ -2,6 +2,20 @@
 
 A local SQLite-backed memory plugin for recurring technical errors. It helps Codex search previous fixes before debugging and record new lessons after a problem is resolved.
 
+## Install
+
+Install directly:
+
+```powershell
+codex plugin install https://github.com/yuhuayao314/codex-error-memory
+```
+
+Or install it from the public marketplace repository:
+
+```powershell
+codex plugin marketplace add https://github.com/yuhuayao314/codex-plugin-marketplace
+```
+
 ## Use
 
 Search prior memories:
