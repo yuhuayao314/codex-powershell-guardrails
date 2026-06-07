@@ -117,3 +117,11 @@ Symptom: GitHub marketplace has a new plugin but the Codex UI still shows the ol
 Cause: `C:\Users\<user>\.codex\.tmp\marketplaces\<marketplace>` can contain a stale `marketplace.json`.
 
 Fix: compare the remote marketplace file with the local cached one. Refresh the marketplace or clear only that marketplace staging folder, then restart Codex.
+
+## Copy-Item with LiteralPath wildcard does not update files
+
+Symptom: a cache or release folder validates but still contains old file contents after a copy step.
+
+Cause: `-LiteralPath` treats `*` as a literal character. A command like `Copy-Item -LiteralPath 'source\*' ...` does not mean "copy all children".
+
+Fix: use `Copy-Item -Path 'source\*' -Destination target -Recurse -Force` when wildcard expansion is intended, or use `robocopy source target /E` for directory synchronization without deleting extra files.

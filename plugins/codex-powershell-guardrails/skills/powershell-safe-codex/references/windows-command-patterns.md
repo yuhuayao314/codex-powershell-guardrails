@@ -49,6 +49,19 @@ subprocess.run([
 '@ | python -
 ```
 
+Use `-Path` for wildcard expansion and `-LiteralPath` only for exact paths:
+
+```powershell
+Copy-Item -Path 'C:\source\*' -Destination 'C:\target' -Recurse -Force
+```
+
+For directory synchronization that should keep extra target files such as a local SQLite database, prefer `robocopy` without `/MIR`:
+
+```powershell
+robocopy 'C:\source' 'C:\target' /E /NFL /NDL /NJH /NJS /NP
+if ($LASTEXITCODE -le 7) { exit 0 } else { exit $LASTEXITCODE }
+```
+
 ## Search
 
 Prefer `rg` when it works, but Windows installs sometimes fail with `Access is denied`.

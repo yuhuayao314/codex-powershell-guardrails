@@ -223,6 +223,19 @@ BUILTIN_MEMORIES = [
         "files_often_involved": "PowerShell commands, Python one-off scripts",
         "commands_often_used": "@'\\nimport sys\\nprint(sys.argv[1])\\n'@ | python - $path",
     },
+    {
+        "title": "Copy-Item 的 LiteralPath 不会展开通配符",
+        "category": "shell",
+        "severity": "medium",
+        "signature": "Copy-Item LiteralPath wildcard star did not update target old files remain",
+        "keywords": "powershell copy-item literalpath wildcard star old files cache not updated",
+        "root_cause": "`-LiteralPath` 会把 `*` 当作普通字符，不会展开通配符；看似复制了目录，实际目标文件仍然是旧内容。",
+        "fix_steps": "需要通配符时使用 `Copy-Item -Path 'source\\*' -Destination target -Recurse -Force`；同步目录且保留目标额外文件时使用 `robocopy source target /E`。",
+        "prevention_rule": "PowerShell 中 `-LiteralPath` 只用于精确路径；任何包含 `*` 的复制命令都要改用 `-Path` 或 robocopy。",
+        "verification_steps": "复制后用 `Select-String` 或文件哈希确认目标内容已经更新，而不是只看命令退出码。",
+        "files_often_involved": "PowerShell commands, plugin cache sync, release sync",
+        "commands_often_used": "Copy-Item -Path 'C:\\source\\*' -Destination 'C:\\target' -Recurse -Force",
+    },
 ]
 
 

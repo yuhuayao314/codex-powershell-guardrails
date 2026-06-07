@@ -1,6 +1,6 @@
 ---
 name: powershell-safe-codex
-description: Always use when Codex will write, review, explain, or run any PowerShell command or script. Also use for Windows terminal work, Windows paths, .ps1/.bat/.cmd files, cmd.exe commands, Windows SSH/Paramiko automation, scheduled tasks, Codex plugin or marketplace cache work, WeChat Mini Program files, release packaging, or any task where Unix shell habits may break on Windows. Helps avoid heredoc mistakes, quoting bugs, UTF-8/BOM issues, unsafe deletes, localhost leaks, pycache/log/env/database artifacts, invalid plugin cache cleanup, Chinese-path encoding bugs, angle-bracket redirection mistakes, and unclear task-scheduler exit codes.
+description: Always use when Codex will write, review, explain, or run any PowerShell command or script. Also use for Windows terminal work, Windows paths, .ps1/.bat/.cmd files, cmd.exe commands, Windows SSH/Paramiko automation, scheduled tasks, Codex plugin or marketplace cache work, WeChat Mini Program files, release packaging, or any task where Unix shell habits may break on Windows. Helps avoid heredoc mistakes, quoting bugs, UTF-8/BOM issues, unsafe deletes, localhost leaks, pycache/log/env/database artifacts, invalid plugin cache cleanup, Chinese-path encoding bugs, angle-bracket redirection mistakes, wildcard copy mistakes, and unclear task-scheduler exit codes.
 ---
 
 # PowerShell Safe Codex
@@ -57,6 +57,7 @@ Never use `python - <<'PY'` in PowerShell. Never enumerate paths in PowerShell a
 - Do not pass placeholder strings like `<plugin>` or `<marketplace>` as raw PowerShell arguments; `<` can be parsed as a redirection operator.
 - If arguments contain angle brackets, dollar signs, percent signs, nested quotes, or non-ASCII paths, prefer Python `subprocess.run([...])` from a here-string or a temporary script.
 - Avoid hard-coding Chinese Windows paths inside piped stdin scripts. Pass paths through `sys.argv` or environment variables so they are not damaged by console encoding.
+- Use `-LiteralPath` for exact paths and `-Path` for wildcard expansion. Do not expect `Copy-Item -LiteralPath '...\*'` to expand `*`.
 - When a command fails because of parsing or encoding, do not repeat the same shape. Change transport: native PowerShell cmdlet, here-string, temp script, or list-style subprocess.
 
 ## Codex Plugin / Marketplace Rules
