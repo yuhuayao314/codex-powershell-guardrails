@@ -5,5 +5,7 @@ __pycache__/
 *.pyo
 *.log
 *.tmp
+*.sqlite
+*.db
 .env
 .DS_Store

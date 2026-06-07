@@ -1,74 +1,51 @@
-# Codex PowerShell Guardrails
+# yuhuayao314 Codex Plugins
 
-A Codex plugin for safer Windows and PowerShell work. It packages one skill and a small scanner that help agents avoid common mistakes when editing Windows projects, automating Windows servers, or preparing release archives.
+This repository is a small Codex plugin marketplace.
 
-## What It Helps With
+## Plugins
+
+### PowerShell Guardrails
+
+`codex-powershell-guardrails` helps Codex work more safely on Windows and PowerShell:
 
 - PowerShell-safe inline Python and command patterns
-- UTF-8 BOM checks for WeChat Mini Program files and config files
-- Safer Windows file deletion and process inspection
-- Paramiko/SSH patterns for Windows Server automation
-- Scheduled task logging and explicit exit codes
-- Release artifact hygiene before GitHub upload or deployment
-- Local API URL leaks such as `127.0.0.1:5000`
+- UTF-8 BOM checks
+- safer Windows file deletion and process inspection
+- Windows SSH / Paramiko patterns
+- scheduled task exit-code guidance
+- release artifact hygiene checks
 
-## Plugin Contents
+### Codex Error Memory
 
-- `skills/powershell-safe-codex/SKILL.md`: instructions Codex can load automatically when the task involves Windows or PowerShell.
-- `skills/powershell-safe-codex/references/`: practical command patterns and failure cases.
-- `scripts/check_windows_artifacts.py`: scanner for release-package mistakes.
+`codex-error-memory` helps Codex remember recurring technical errors:
 
-## Scanner Usage
+- searches a local SQLite memory before debugging
+- stores technical error signatures, root causes, fixes, prevention rules, and verification steps
+- keeps memories project-scoped when a project path is supplied
+- includes built-in technical memories for shell, encoding, release, deploy, config, and git mistakes
+- avoids storing secrets, long raw logs, user personal information, and reality-policy decisions
 
-From the plugin root:
-
-```powershell
-python scripts\check_windows_artifacts.py C:\path\to\project
-```
-
-For release archives:
-
-```powershell
-python scripts\check_windows_artifacts.py C:\path\to\release --release --strict
-```
-
-Allow local development URLs during local-only checks:
-
-```powershell
-python scripts\check_windows_artifacts.py C:\path\to\project --allow-localhost
-```
-
-## Installing Locally
-
-This repository supports two install styles:
-
-- Plugin root install: use the repository as a single plugin.
-- Marketplace install: use the repository as a tiny marketplace that contains this plugin under `plugins/codex-powershell-guardrails`.
-
-Install from a local checkout with Codex:
-
-```powershell
-codex plugin install E:\path\to\codex-powershell-guardrails
-```
-
-After publishing to GitHub, users can install from the repository URL:
-
-```powershell
-codex plugin install https://github.com/<owner>/codex-powershell-guardrails
-```
-
-If your Codex UI asks you to add a marketplace instead of a single plugin, add the same GitHub repository as a marketplace, then install `codex-powershell-guardrails` from the `yuhuayao314` marketplace.
-
-## Suggested Use
-
-Ask Codex:
+## Marketplace Layout
 
 ```text
-Use PowerShell Guardrails and check this Windows release package before upload.
+.agents/plugins/marketplace.json
+plugins/
+  codex-powershell-guardrails/
+  codex-error-memory/
 ```
 
-or:
+Add this repository as a marketplace in Codex, then install the plugin you want from `yuhuayao314 Plugins`.
 
-```text
-用 PowerShell Guardrails 帮我写一个 Windows Server 上安全执行的 Paramiko 脚本。
+## Direct Local Use
+
+PowerShell Guardrails scanner:
+
+```powershell
+python plugins\codex-powershell-guardrails\scripts\check_windows_artifacts.py C:\path\to\release --release --strict
+```
+
+Error Memory search:
+
+```powershell
+python plugins\codex-error-memory\scripts\memory_cli.py search --project C:\path\to\project --text "error text"
 ```

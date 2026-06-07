@@ -1,0 +1,31 @@
+{
+  "name": "codex-error-memory",
+  "version": "0.1.0",
+  "description": "Local error-memory guardrails for Codex agents: remember recurring technical failures, search prior fixes, and write reusable debugging knowledge into a small SQLite database.",
+  "author": {
+    "name": "yuhuayao314"
+  },
+  "repository": "https://github.com/yuhuayao314/codex-powershell-guardrails",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "debugging",
+    "error-memory",
+    "sqlite",
+    "guardrails"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codex Error Memory",
+    "shortDescription": "Remember recurring project errors and reuse proven fixes.",
+    "longDescription": "A local SQLite-backed memory plugin for technical errors, failed commands, build failures, deployment issues, and repeated bugs. It helps Codex search prior fixes before debugging and record new lessons after resolution.",
+    "developerName": "yuhuayao314",
+    "category": "Productivity",
+    "capabilities": [
+      "Error memory",
+      "Debugging guidance",
+      "Local SQLite storage"
+    ],
+    "defaultPrompt": "Use Codex Error Memory to check whether this error has happened before."
+  }
+}
