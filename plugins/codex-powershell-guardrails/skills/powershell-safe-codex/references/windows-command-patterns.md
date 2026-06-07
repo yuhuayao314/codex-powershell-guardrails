@@ -22,6 +22,33 @@ print("x")
 
 For scripts with paths or quotes, this is safer than a one-line `python -c`.
 
+For non-ASCII paths, pass the path as an argument instead of hard-coding it in the piped script:
+
+```powershell
+$target = 'C:\Users\北妖\project'
+@'
+import sys
+from pathlib import Path
+target = Path(sys.argv[1])
+print(target, target.exists())
+'@ | python - $target
+```
+
+For arguments containing characters PowerShell may parse, use Python list arguments:
+
+```powershell
+@'
+import subprocess
+subprocess.run([
+    "python",
+    "scripts\\memory_cli.py",
+    "search",
+    "--text",
+    "literal text with [plugin] placeholder"
+], check=True)
+'@ | python -
+```
+
 ## Search
 
 Prefer `rg` when it works, but Windows installs sometimes fail with `Access is denied`.

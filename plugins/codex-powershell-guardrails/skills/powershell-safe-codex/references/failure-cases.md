@@ -85,3 +85,35 @@ Fix: generate a clean archive and run the artifact scanner in strict mode.
 Symptom: public logs contain HTTP/2 probes, `.env` scans, or malformed external requests; service becomes easier to stall.
 
 Fix: use a real edge server such as Nginx or Caddy and keep Python behind a local-only WSGI service.
+
+## Angle brackets in PowerShell arguments
+
+Symptom: PowerShell reports `The '<' operator is reserved for future use` or `RedirectionNotSupported`.
+
+Cause: a placeholder such as `<plugin>` was passed as a raw command argument and PowerShell parsed `<` as syntax.
+
+Fix: avoid angle-bracket placeholders in raw commands. Use neutral placeholders like `[plugin]`, or call a Python script with `subprocess.run([...])` list arguments.
+
+## Chinese path damaged in piped Python
+
+Symptom: a path like `C:\Users\北妖\...` becomes `C:\Users\??\...`, then Python raises `WinError 267` for invalid cwd.
+
+Cause: a Python script piped through PowerShell stdin included a hard-coded non-ASCII path and the console encoding damaged it.
+
+Fix: pass non-ASCII paths through `sys.argv` or environment variables, or run a UTF-8 script file. In the script, print `Path.exists()` before using the path as `cwd`.
+
+## Plugin disappears after cache cleanup
+
+Symptom: a previously working Codex plugin no longer appears after cleaning plugin cache folders.
+
+Cause: installed plugins are loaded from `C:\Users\<user>\.codex\plugins\cache\<marketplace>\<plugin>\<version>`. Removing the whole marketplace cache removes the plugin files.
+
+Fix: only clear targeted staging/cache paths. If already deleted, restore the plugin folder to the cache path, validate it, and ensure `config.toml` still has `[plugins."<plugin>@<marketplace>"] enabled = true`.
+
+## Marketplace update not visible
+
+Symptom: GitHub marketplace has a new plugin but the Codex UI still shows the old plugin list.
+
+Cause: `C:\Users\<user>\.codex\.tmp\marketplaces\<marketplace>` can contain a stale `marketplace.json`.
+
+Fix: compare the remote marketplace file with the local cached one. Refresh the marketplace or clear only that marketplace staging folder, then restart Codex.

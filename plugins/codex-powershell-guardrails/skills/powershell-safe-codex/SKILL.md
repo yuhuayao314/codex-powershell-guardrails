@@ -1,11 +1,11 @@
 ---
 name: powershell-safe-codex
-description: Always use when Codex will write, review, explain, or run any PowerShell command or script. Also use for Windows terminal work, Windows paths, .ps1/.bat/.cmd files, cmd.exe commands, Windows SSH/Paramiko automation, scheduled tasks, WeChat Mini Program files, release packaging, or any task where Unix shell habits may break on Windows. Helps avoid heredoc mistakes, quoting bugs, UTF-8 BOM issues, unsafe deletes, localhost leaks, pycache/log/env/database artifacts, and unclear task-scheduler exit codes.
+description: Always use when Codex will write, review, explain, or run any PowerShell command or script. Also use for Windows terminal work, Windows paths, .ps1/.bat/.cmd files, cmd.exe commands, Windows SSH/Paramiko automation, scheduled tasks, Codex plugin or marketplace cache work, WeChat Mini Program files, release packaging, or any task where Unix shell habits may break on Windows. Helps avoid heredoc mistakes, quoting bugs, UTF-8/BOM issues, unsafe deletes, localhost leaks, pycache/log/env/database artifacts, invalid plugin cache cleanup, Chinese-path encoding bugs, angle-bracket redirection mistakes, and unclear task-scheduler exit codes.
 ---
 
 # PowerShell Safe Codex
 
-Use this skill before writing, reviewing, explaining, or running any PowerShell command. Also use it for Windows terminal work, Windows paths, release packaging, frontend encoding checks, or Windows server automation.
+Use this skill before writing, reviewing, explaining, or running any PowerShell command. Also use it for Windows terminal work, Windows paths, release packaging, frontend encoding checks, Codex plugin cache/marketplace work, or Windows server automation.
 
 ## Default Workflow
 
@@ -13,7 +13,9 @@ Use this skill before writing, reviewing, explaining, or running any PowerShell 
 2. Prefer short native PowerShell commands. For complex logic, use a PowerShell here-string piped to Python.
 3. Avoid Unix-only shell syntax unless the shell is actually Bash.
 4. Before editing release artifacts, plan encoding and cleanup checks.
-5. After edits, run syntax checks plus the artifact scanner if packaging or uploading.
+5. Before commands that contain `<`, `>`, `$`, `%`, nested quotes, or Chinese paths, switch to a temporary script, `sys.argv`, or Python `subprocess.run([...])` list arguments.
+6. If any command fails, stop and classify the failure before retrying. If `codex-error-memory` is available, search it with the exact error excerpt.
+7. After edits, run syntax checks plus the artifact scanner if packaging or uploading.
 
 ## Command Patterns
 
@@ -49,6 +51,21 @@ Remove-Item -LiteralPath $path -Force
 ```
 
 Never use `python - <<'PY'` in PowerShell. Never enumerate paths in PowerShell and pass them to another shell for deletion.
+
+## Argument Safety
+
+- Do not pass placeholder strings like `<plugin>` or `<marketplace>` as raw PowerShell arguments; `<` can be parsed as a redirection operator.
+- If arguments contain angle brackets, dollar signs, percent signs, nested quotes, or non-ASCII paths, prefer Python `subprocess.run([...])` from a here-string or a temporary script.
+- Avoid hard-coding Chinese Windows paths inside piped stdin scripts. Pass paths through `sys.argv` or environment variables so they are not damaged by console encoding.
+- When a command fails because of parsing or encoding, do not repeat the same shape. Change transport: native PowerShell cmdlet, here-string, temp script, or list-style subprocess.
+
+## Codex Plugin / Marketplace Rules
+
+- A GitHub repository should be either a single plugin root or a marketplace root. Do not keep both root `.codex-plugin/` and `.agents/plugins/marketplace.json` for long-term publishing.
+- For marketplace repos, keep plugins under `plugins/<plugin-name>/` and register them in `.agents/plugins/marketplace.json`.
+- Do not delete an entire `C:\Users\<user>\.codex\plugins\cache\<marketplace>` folder casually; installed plugins may be loaded from that cache.
+- When debugging plugin visibility, check three places together: marketplace cache, plugin cache, and `C:\Users\<user>\.codex\config.toml` enabled entries.
+- If a marketplace update is not visible, compare GitHub `.agents/plugins/marketplace.json` with `C:\Users\<user>\.codex\.tmp\marketplaces\<marketplace>\.agents\plugins\marketplace.json`.
 
 ## Encoding Rules
 

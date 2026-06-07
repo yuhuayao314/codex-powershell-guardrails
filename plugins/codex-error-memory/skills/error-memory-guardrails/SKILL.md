@@ -10,7 +10,7 @@ Use this skill before diagnosing technical failures. The goal is to make Codex l
 ## Default Workflow
 
 1. Capture a short error excerpt: command output, stack trace, build message, runtime symptom, or user-described failure.
-2. Run a memory search:
+2. Run a memory search before proposing a fix:
 
 ```powershell
 python plugins\codex-error-memory\scripts\memory_cli.py search --project <project-root> --text "<error excerpt>"
@@ -18,13 +18,14 @@ python plugins\codex-error-memory\scripts\memory_cli.py search --project <projec
 
 3. If a high-confidence result appears, explain why it may match, then verify against the current project before editing.
 4. If there is no useful match, debug systematically with normal project evidence.
-5. After the issue is resolved, add a reusable technical memory:
+5. After the issue is resolved, add a reusable technical memory. Treat this as the default after any new technical failure that required investigation, unless the user says not to write memory:
 
 ```powershell
 python plugins\codex-error-memory\scripts\memory_cli.py add --project <project-root> --title "<short title>" --error-file error.txt --root-cause "<cause>" --fix-steps "<steps>" --verification-steps "<checks>"
 ```
 
 6. Record an occurrence when a known issue appears again.
+7. If another plugin, such as `codex-powershell-guardrails`, is active and the failure belongs to that plugin's domain, apply that plugin's rules immediately after the memory search. The memory plugin remembers; the domain plugin prevents repeat mistakes.
 
 ## What To Store
 
