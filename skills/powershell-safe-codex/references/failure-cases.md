@@ -30,6 +30,14 @@ Cause: the first key can become `\ufeffKEY`.
 
 Fix: keep `.env` out of release archives, write it explicitly without BOM, and print loaded config keys during diagnostics without printing secrets.
 
+## PowerShell-written .env breaks WeChat login
+
+Symptom: public `/api/health` still returns 200, but the WeChat Mini Program cannot log in after a backend deployment.
+
+Cause: Windows PowerShell wrote `.env` with UTF-8 BOM. The first key became `\ufeffWX_APPID`, so the backend silently used a default/placeholder AppID while later keys such as MySQL config still appeared normal.
+
+Fix: rewrite `.env` with Python `Path.write_text(..., encoding="utf-8")`, restart the backend, then verify the first bytes are not `EF BB BF`. Confirm `Config.WX_APPID` matches production and `Config.WX_SECRET` is not a placeholder, but never print the secret itself.
+
 ## `rg.exe` is blocked or returns access denied
 
 Symptom: search fails on Windows even though files exist.

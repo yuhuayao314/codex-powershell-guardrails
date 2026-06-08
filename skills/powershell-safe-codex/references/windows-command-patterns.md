@@ -70,6 +70,22 @@ $encoded = [Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($c
 Start-Process powershell.exe -ArgumentList @('-NoExit', '-EncodedCommand', $encoded)
 ```
 
+When writing `.env`, use Python to avoid UTF-8 BOM and verify the first bytes:
+
+```powershell
+$envPath = 'C:\aiqiandao\server\.env'
+@'
+import sys
+from pathlib import Path
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8-sig")
+path.write_text(text, encoding="utf-8")
+print(list(path.read_bytes()[:3]))
+'@ | python - $envPath
+```
+
+The printed first bytes must not be `239, 187, 191`.
+
 ## Search
 
 Prefer `rg` when it works, but Windows installs sometimes fail with `Access is denied`.

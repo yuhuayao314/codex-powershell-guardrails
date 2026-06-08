@@ -73,7 +73,9 @@ Never use `python - <<'PY'` in PowerShell. Never enumerate paths in PowerShell a
 
 - Do not use PowerShell redirection or `Set-Content` casually for `.wxss`, `.wxml`, `.js`, `.json`, `.py`, `.toml`, `.yaml`, `.md`.
 - Watch for UTF-8 BOM in WeChat Mini Program files; WXSS can fail with `unexpected � at pos 1`.
+- Treat `.env` as especially sensitive to BOM. In Windows PowerShell, `Set-Content -Encoding UTF8` can write a BOM; if `.env` starts with BOM, the first key can become `\ufeffWX_APPID` and production WeChat login can fail.
 - Prefer editor-aware patches or scripts that explicitly write `encoding="utf-8"` without BOM.
+- After editing `.env` or release config, verify the first bytes are not `EF BB BF` and verify critical keys load by name without printing secret values.
 - After bulk edits, scan for BOM and syntax errors.
 
 ## Windows Server / SSH Rules
