@@ -63,6 +63,28 @@ Symptom: commands work locally but fail through Paramiko because quotes, `$`, `%
 
 Fix: upload a temporary `.py`, `.ps1`, or `.bat` file, execute it, then delete it. Keep `exec_command` short.
 
+## Remote PowerShell stdin returns empty output
+
+Symptom: `powershell -NoProfile -ExecutionPolicy Bypass -Command -` through Paramiko exits without useful stdout/stderr, even though the intended script should print diagnostics.
+
+Cause: Windows OpenSSH, PowerShell, and Paramiko stdin handling can be unreliable for multiline scripts.
+
+Fix: write the diagnostic as a temporary UTF-8 `.ps1`, upload it with SFTP, run `powershell -File`, capture stdout/stderr, then delete the remote script.
+
+## Remote JSON with Chinese becomes mojibake
+
+Symptom: a remote Windows Python script prints JSON containing Chinese names, but the local report shows garbled text or must be read as UTF-16 after PowerShell redirection.
+
+Cause: Windows console codepages and PowerShell redirection can transcode text stdout. `print(json.dumps(..., ensure_ascii=False))` is not stable enough across Paramiko, remote cmd, and local redirection.
+
+Fix: on the remote Python side, output explicit UTF-8 bytes:
+
+```python
+sys.stdout.buffer.write(json.dumps(data, ensure_ascii=False, default=str).encode("utf-8"))
+```
+
+Then decode Paramiko stdout as UTF-8 locally. If a local PowerShell redirection already created a UTF-16 file, read it with `encoding="utf-16"`.
+
 ## Remote delete path uses mixed slashes
 
 Symptom: temporary remote file is created but not deleted.
@@ -134,6 +156,22 @@ Cause: `-LiteralPath` treats `*` as a literal character. A command like `Copy-It
 
 Fix: use `Copy-Item -Path 'source\*' -Destination target -Recurse -Force` when wildcard expansion is intended, or use `robocopy source target /E` for directory synchronization without deleting extra files.
 
+## New-Item LiteralPath is not available in older Windows PowerShell
+
+Symptom: `New-Item -ItemType Directory -LiteralPath ...` fails with `A parameter cannot be found that matches parameter name 'LiteralPath'`.
+
+Cause: some Windows PowerShell builds do not expose `-LiteralPath` on `New-Item`, even though many other file cmdlets do.
+
+Fix: use `New-Item -ItemType Directory -Path $path` after building the exact path in a variable. For deletes, moves, and reads, continue to prefer cmdlets that support `-LiteralPath`.
+
+## GitHub push is blocked by a dead local proxy
+
+Symptom: `git push` fails with `Failed to connect to github.com port 443 via 127.0.0.1` or `Could not connect to server`.
+
+Cause: global Git config has `http.proxy` or `https.proxy` pointing to a local proxy port, but that proxy process is not running.
+
+Fix: inspect proxy config with `git config --show-origin --get-regexp "http.*proxy|https.*proxy"`. If you do not want to change the global config, run a one-off push with `git -c http.proxy= -c https.proxy= push origin main`.
+
 ## Start-Process loses quotes around Program Files path
 
 Symptom: a newly opened PowerShell window reports `The term 'C:\Program' is not recognized`.
@@ -141,3 +179,11 @@ Symptom: a newly opened PowerShell window reports `The term 'C:\Program' is not 
 Cause: `Start-Process powershell.exe -ArgumentList` launched another parser pass, and the quoted executable path inside the command string lost its quotes. Paths under `C:\Program Files\...` were split at the space.
 
 Fix: use `-EncodedCommand`, a temporary `.ps1` file, or carefully separated arguments. For visible interactive login flows, `-EncodedCommand` is often the least fragile option.
+
+## Local Waitress starts but health check cannot connect
+
+Symptom: `Invoke-WebRequest http://127.0.0.1:5000/api/health` cannot connect after starting `waitress_run.py`.
+
+Causes: the process may have crashed before binding the port. Common causes are missing Python packages such as `pymysql`, or a local `.env` pointing at invalid MySQL credentials.
+
+Fix: inspect redirected `local_waitress_stderr.log` before changing application code. Install missing requirements, or for local-only testing switch the local `.env` to a known local database copy such as SQLite `data.db`.

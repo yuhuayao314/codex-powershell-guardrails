@@ -10,7 +10,8 @@ A Codex plugin for safer Windows and PowerShell work. It packages one skill and 
 - Paramiko/SSH patterns for Windows Server automation
 - Scheduled task logging and explicit exit codes
 - Release artifact hygiene before GitHub upload or deployment
-- Local API URL leaks such as `127.0.0.1:5000`
+- Local and private-network URL leaks such as `127.0.0.1:5000`, `192.168.*`, `10.*`, and `172.16-31.*`
+- Common hard-coded secret formats such as OpenAI keys, GitHub tokens, cloud access keys, JWTs, and private-key blocks
 
 ## Plugin Contents
 
@@ -31,6 +32,8 @@ For release archives:
 ```powershell
 python scripts\check_windows_artifacts.py C:\path\to\release --release --strict
 ```
+
+In `--release` mode the scanner includes `dist/` and `build/` because those directories often contain the actual upload package. For non-release project scans they are skipped by default; add `--include-build` to include them.
 
 Allow local development URLs during local-only checks:
 

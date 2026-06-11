@@ -175,3 +175,28 @@ Decode output defensively:
 stdout.read().decode("utf-8", errors="replace")
 stderr.read().decode("gbk", errors="replace")
 ```
+
+For remote reports containing Chinese text or JSON, make the remote script write UTF-8 bytes instead of relying on `print()`:
+
+```python
+payload = json.dumps(report, ensure_ascii=False, default=str, indent=2)
+sys.stdout.buffer.write(payload.encode("utf-8"))
+```
+
+Then decode Paramiko stdout as UTF-8. Avoid routing this output through extra PowerShell redirection layers when possible.
+
+For multiline PowerShell diagnostics, do not rely on `powershell -Command -` over SSH stdin. Upload a `.ps1` and run it:
+
+```python
+from pathlib import Path
+
+local_ps1 = Path("diagnostic.ps1")
+local_ps1.write_text(script, encoding="utf-8")
+sftp.put(str(local_ps1), "C:/aiqiandao/_diagnostic.ps1")
+stdin, stdout, stderr = ssh.exec_command(
+    'powershell -NoProfile -ExecutionPolicy Bypass -File "C:\\aiqiandao\\_diagnostic.ps1"'
+)
+print(stdout.read().decode("utf-8", errors="replace"))
+print(stderr.read().decode("utf-8", errors="replace"))
+ssh.exec_command('del "C:\\aiqiandao\\_diagnostic.ps1"')
+```

@@ -1,11 +1,11 @@
 ---
 name: powershell-safe-codex
-description: Always use when Codex will write, review, explain, or run any PowerShell command or script. Also use for Windows terminal work, Windows paths, .ps1/.bat/.cmd files, cmd.exe commands, Windows SSH/Paramiko automation, scheduled tasks, Codex plugin or marketplace cache work, WeChat Mini Program files, release packaging, or any task where Unix shell habits may break on Windows. Helps avoid heredoc mistakes, quoting bugs, UTF-8/BOM issues, unsafe deletes, localhost leaks, pycache/log/env/database artifacts, invalid plugin cache cleanup, Chinese-path encoding bugs, angle-bracket redirection mistakes, wildcard copy mistakes, Start-Process quoting failures, and unclear task-scheduler exit codes.
+description: Always use when Codex will write, review, explain, or run PowerShell, cmd.exe, .ps1/.bat/.cmd, Windows SSH/Paramiko, scheduled-task, Windows-path, Codex plugin/marketplace, or Windows release-packaging commands. Use for source/package encoding checks when Windows tooling is involved. Helps avoid heredoc mistakes, quoting bugs, UTF-8/BOM issues, unsafe deletes, local URL leaks, generated artifact leaks, plugin cache mistakes, Chinese-path encoding bugs, wildcard copy mistakes, Start-Process quoting failures, and unclear task-scheduler exit codes.
 ---
 
 # PowerShell Safe Codex
 
-Use this skill before writing, reviewing, explaining, or running any PowerShell command. Also use it for Windows terminal work, Windows paths, release packaging, frontend encoding checks, Codex plugin cache/marketplace work, or Windows server automation.
+Use this skill before writing, reviewing, explaining, or running any PowerShell command. Also use it for Windows terminal work, Windows paths, release packaging on Windows, Codex plugin cache/marketplace work, or Windows server automation.
 
 ## Default Workflow
 
@@ -97,7 +97,8 @@ Before GitHub upload, deployment, or archive creation, check for:
 Run:
 
 ```powershell
-python scripts/check_windows_artifacts.py <path-to-release>
+$releasePath = "C:\path\to\release"
+python scripts\check_windows_artifacts.py $releasePath --release --strict
 ```
 
 ## References

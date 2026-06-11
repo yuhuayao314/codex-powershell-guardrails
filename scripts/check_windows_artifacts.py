@@ -20,23 +20,35 @@ from typing import Iterable
 
 TEXT_EXTENSIONS = {
     ".bat",
+    ".cjs",
     ".cmd",
+    ".cfg",
+    ".conf",
     ".css",
     ".html",
+    ".ini",
+    ".jsx",
     ".js",
     ".json",
+    ".lock",
     ".md",
+    ".mjs",
     ".ps1",
+    ".properties",
     ".py",
+    ".sql",
     ".toml",
     ".ts",
+    ".tsx",
+    ".vue",
     ".wxml",
     ".wxss",
+    ".xml",
     ".yaml",
     ".yml",
 }
 
-SKIP_DIRS = {
+ALWAYS_SKIP_DIRS = {
     ".git",
     ".hg",
     ".svn",
@@ -44,9 +56,9 @@ SKIP_DIRS = {
     "venv",
     "env",
     "node_modules",
-    "dist",
-    "build",
 }
+
+DEFAULT_SKIP_DIRS = ALWAYS_SKIP_DIRS | {"dist", "build"}
 
 RUNTIME_FILE_PATTERNS = [
     ".env",
@@ -63,6 +75,17 @@ RUNTIME_FILE_PATTERNS = [
 LOCAL_PATTERNS = [
     re.compile(r"https?://(?:127\.0\.0\.1|localhost|0\.0\.0\.0)(?::\d+)?", re.I),
     re.compile(r"\b(?:127\.0\.0\.1|localhost|0\.0\.0\.0):\d+\b", re.I),
+    re.compile(r"https?://(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(?::\d+)?", re.I),
+    re.compile(r"\b(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}):\d+\b", re.I),
+]
+
+SECRET_PATTERNS = [
+    re.compile(r"\bsk-[A-Za-z0-9_-]{20,}\b"),
+    re.compile(r"\bgh[pousr]_[A-Za-z0-9_]{20,}\b"),
+    re.compile(r"\b(?:AKIA|ASIA)[0-9A-Z]{16}\b"),
+    re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
+    re.compile(r"(?i)\b(?:WX_SECRET|API_KEY|SECRET_KEY|ACCESS_KEY|ACCESS_TOKEN|PRIVATE_KEY)\b\s*[:=]\s*['\"]?[^'\"\s,;]{8,}"),
+    re.compile(r"\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b"),
 ]
 
 BASH_HEREDOC = re.compile(r"<<\s*['\"]?[A-Za-z_][A-Za-z0-9_]*['\"]?")
@@ -91,18 +114,19 @@ def is_text_candidate(path: Path) -> bool:
     return path.suffix.lower() in TEXT_EXTENSIONS or path.name.lower() in {".env", ".gitignore"}
 
 
-def should_skip_dir(path: Path) -> bool:
-    return path.name in SKIP_DIRS
+def should_skip_dir(path: Path, *, release: bool, include_build: bool) -> bool:
+    skip_dirs = ALWAYS_SKIP_DIRS if (release or include_build) else DEFAULT_SKIP_DIRS
+    return path.name in skip_dirs
 
 
-def iter_files(paths: Iterable[Path]) -> Iterable[Path]:
+def iter_files(paths: Iterable[Path], *, release: bool, include_build: bool) -> Iterable[Path]:
     for base in paths:
         if base.is_file():
             yield base
             continue
         for dirpath, dirnames, filenames in os.walk(base):
             current = Path(dirpath)
-            dirnames[:] = [d for d in dirnames if not should_skip_dir(current / d)]
+            dirnames[:] = [d for d in dirnames if not should_skip_dir(current / d, release=release, include_build=include_build)]
             for name in filenames:
                 yield current / name
 
@@ -143,8 +167,13 @@ def scan_file(path: Path, *, release: bool, allow_localhost: bool) -> list[Findi
         if not allow_localhost:
             for pattern in LOCAL_PATTERNS:
                 if pattern.search(line):
-                    findings.append(Finding("ERROR" if release else "WARN", path, "local-only host or development port reference", index))
+                    findings.append(Finding("ERROR" if release else "WARN", path, "local/private host or development port reference", index))
                     break
+
+        for pattern in SECRET_PATTERNS:
+            if pattern.search(line):
+                findings.append(Finding("ERROR" if release else "WARN", path, "possible hard-coded secret or private key", index))
+                break
 
         if path.suffix.lower() in {".ps1", ".bat", ".cmd"} and BASH_HEREDOC.search(line):
             findings.append(Finding("WARN", path, "Bash heredoc syntax appears in Windows-oriented file", index))
@@ -161,6 +190,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--release", action="store_true", help="Treat findings as release-blocking where appropriate.")
     parser.add_argument("--strict", action="store_true", help="Exit non-zero for warnings as well as errors.")
     parser.add_argument("--allow-localhost", action="store_true", help="Do not warn about localhost or 127.0.0.1 references.")
+    parser.add_argument("--include-build", action="store_true", help="Scan dist/ and build/ even when --release is not set.")
     args = parser.parse_args(argv)
 
     roots = [Path(item).resolve() for item in args.paths]
@@ -170,7 +200,7 @@ def main(argv: list[str] | None = None) -> int:
         if not root.exists():
             findings.append(Finding("ERROR", root, "path does not exist"))
             continue
-        for file_path in iter_files([root]):
+        for file_path in iter_files([root], release=args.release, include_build=args.include_build):
             findings.extend(scan_file(file_path, release=args.release, allow_localhost=args.allow_localhost))
 
     base = roots[0] if len(roots) == 1 and roots[0].is_dir() else None
